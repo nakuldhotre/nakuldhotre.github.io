@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <link href="./resources/nv.d3.css" rel="stylesheet" type="text/css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.2/d3.min.js" charset="utf-8"></script>
+    <script src="./resources/nv.d3.js"></script>
+
+    <style>
+        text {
+            font: 12px sans-serif;
+        }
+        svg {
+            display: block;
+        }
+        html, body, #chart1, svg {
+            margin: 0px;
+            padding: 0px;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<div id="chart1">
+    <svg></svg>
+</div>
+
+<script>
+
+    
+    d3.csv("testdata.csv", function(error, data){
+        console.log(data)
+        var dataToPlot = Object.keys(data[0]).filter(function(k) { return k!="year"})
+                                    .map(function(k){
+            return {"key":k,"values":data.map(function(id) {
+                return {
+                    "x": id.year,
+                    "y": id[k]
+                }
+            })}
+        })
+        console.log(dataToPlot);
+       
+        var myYDomain = ([0, 350]);
+        console.log(myYDomain);
+        
+    nv.addGraph(function() {
+        var chart = nv.models.lineChart()
+        .options(
+            {
+                margin: {top: 50, right: 80, bottom: 30, left: 50},
+                duraiton: 300,
+                transitionDuration: 350,
+                useInteractiveGuideline: true,
+                yDomain: myYDomain,
+                interpolate: "cardinal",
+                height: 500,
+                width: 960,
+                showXAxis: true,
+                showYAxis: true,
+                tooltips: true
+            });
+        
+        chart.xAxis
+        .axisLabel('Year')
+        
+        chart.yAxis
+        .axisLabel('Million BTUs per Person')
+        d3.select('#chart1 svg')
+            .datum(dataToPlot)
+            .call(chart);
+        nv.utils.windowResize(chart.update);       
+        return chart;
+
+    });
+    })
+
+</script>
+</body></html>

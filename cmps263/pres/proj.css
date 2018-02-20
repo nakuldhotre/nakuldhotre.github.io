@@ -1,0 +1,150 @@
+svg {
+    display: block;
+    margin: 0 auto;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: #000;
+    stroke-width: 1.5px;
+    shape-rendering: geometricPrecision;
+}
+
+.line {
+    fill: none;
+    stroke: steelblue;
+    stroke-width: 1.5px;
+}
+
+.axisRed path,
+.axisRed line{
+    fill: none;
+    stroke: #e41a1c;
+    stroke-width: 2px;
+    shape-rendering: geometricPrecision;
+}
+
+.axisBlue path,
+.axisBlue line{
+    fill: none;
+    stroke: #377eb8;
+    stroke-width: 2px;
+    shape-rendering: geometricPrecision;
+}
+
+.axisYellow path,
+.axisYellow line{
+    fill: none;
+    stroke: #FFAC00;
+    stroke-width: 2px;
+    shape-rendering: geometricPrecision;
+}
+
+.axisGreen path,
+.axisGreen line{
+    fill: none;
+    stroke: #4daf4a;
+    stroke-width: 2px;
+    shape-rendering: geometricPrecision;
+}
+
+div.tooltip {   
+  position: absolute;           
+  width: 150px;                  
+  height: auto;                 
+  padding: 10px;             
+  font: 12px sans-serif;        
+  background-color: white;   
+  border: 1px solid #ddd;  
+  border-radius: 5px;           
+  pointer-events: none;
+  -moz-box-shadow: 4px 4px 12px rgba(0,0,0,.5);
+  -webkit-box-shadow: 4px 4px 12px rgba(0,0,0,.5);
+  box-shadow: 0px 3px 12px rgba(0,0,0,.25);
+}
+
+.left-align {
+    margin: 0;
+    text-align: left;
+}
+
+.right-align {
+    float: right;
+}
+
+.center-align {
+    text-align: center;
+}
+
+.offset-left {
+    margin-left: 28px;
+}
+
+.offset-right {
+    margin-right: 110px;
+}
+
+.card {
+    margin: 10px;
+    float: left;
+    width: 300px;
+    height: 300px;
+    background-color: white;
+    border: 1px solid #ddd;  
+    border-radius: 2px;           
+    -moz-box-shadow: 4px 4px 12px rgba(0,0,0,.5);
+    -webkit-box-shadow: 4px 4px 12px rgba(0,0,0,.5);
+    box-shadow: 0px 3px 12px rgba(0,0,0,.25);
+}
+
+.card-center {
+    margin: 50px;
+    float: center;
+    width: 300px;
+    height: 300px;
+    background-color: white;
+    border: 1px solid #ddd;  
+    border-radius: 2px;           
+    -moz-box-shadow: 4px 4px 12px rgba(0,0,0,.5);
+    -webkit-box-shadow: 4px 4px 12px rgba(0,0,0,.5);
+    box-shadow: 0px 3px 12px rgba(0,0,0,.25);
+}
+.cardInnerMargin {
+    margin: 10px;
+}
+
+.cursorAuto{
+    cursor: auto;
+}
+
+.cardTitle {
+    font-family: sans-serif;
+    fill: gray;
+    font-size: 24px;
+    font-weight: 300;
+}
+
+.buttonMargin {
+    margin: 10px;
+}
+
+.createdByCard {
+    margin: 10px;
+    width: 450px;
+    height: auto;
+    background-color: white;
+    border: 1px solid #ddd;  
+    border-radius: 2px;           
+    pointer-events: none;
+    -moz-box-shadow: 4px 4px 12px rgba(0,0,0,.5);
+    -webkit-box-shadow: 4px 4px 12px rgba(0,0,0,.5);
+    box-shadow: 0px 3px 12px rgba(0,0,0,.25);
+}
+
+.btn:hover, .btn:active, .btn:focus {
+    outline: none !important;
+    color: #000000 !important;
+    background-color: #ffffff !important;
+    border-color: #474544 !important;
+}
