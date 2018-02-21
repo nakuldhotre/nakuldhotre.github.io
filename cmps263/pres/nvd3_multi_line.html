@@ -31,7 +31,7 @@
 
     
     d3.csv("testdata.csv", function(error, data){
-        console.log("logging csv data");
+        console.log("prog:logging csv data");
         console.log(data)
         var dataToPlot = Object.keys(data[0]).filter(function(k) { return k!="year"})
                                     .map(function(k){
@@ -42,14 +42,14 @@
                 }
             })}
         })
-        console.log("logging data in format NVD3 expects")
+        console.log("prog:logging data in format NVD3 expects")
         console.log(dataToPlot)
        
         var myYDomain = ([0, 350]);
-        console.log("setting y domain")
+        console.log("prog:setting y domain")
         console.log(myYDomain);
         
-        console.log("adding the NVD3 chart")
+        console.log("prog:adding the NVD3 chart")
     nv.addGraph(function() {
         var chart = nv.models.lineChart()
         .options(
@@ -66,11 +66,11 @@
                 showYAxis: true,
                 tooltips: true
             });
-        console.log("setting x axis lable")
+        console.log("prog:setting x axis lable")
         chart.xAxis
-        .axisLabel('Year')
+        .axisLabel('prog:Year')
         
-        console.log("setting y axis lable")
+        console.log("prog:setting y axis lable")
         chart.yAxis
         .axisLabel('Million BTUs per Person')
         d3.select('#chart1 svg')
