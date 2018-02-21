@@ -2,9 +2,9 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <link href="./resources/nv.d3.css" rel="stylesheet" type="text/css">
+    <link href="./nv.d3.css" rel="stylesheet" type="text/css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.2/d3.min.js" charset="utf-8"></script>
-    <script src="./resources/nv.d3.js"></script>
+    <script src="./nv.d3.js"></script>
 
     <style>
         text {
@@ -31,6 +31,7 @@
 
     
     d3.csv("testdata.csv", function(error, data){
+        console.log("logging csv data");
         console.log(data)
         var dataToPlot = Object.keys(data[0]).filter(function(k) { return k!="year"})
                                     .map(function(k){
@@ -41,31 +42,35 @@
                 }
             })}
         })
-        console.log(dataToPlot);
+        console.log("logging data in format NVD3 expects")
+        console.log(dataToPlot)
        
         var myYDomain = ([0, 350]);
+        console.log("setting y domain")
         console.log(myYDomain);
         
+        console.log("adding the NVD3 chart")
     nv.addGraph(function() {
         var chart = nv.models.lineChart()
         .options(
             {
-                margin: {top: 50, right: 80, bottom: 30, left: 50},
-                duraiton: 300,
+                margin: {top: 50, right: 80, bottom: 30, left: 50}, // Set margins
+                duration: 300,
                 transitionDuration: 350,
-                useInteractiveGuideline: true,
-                yDomain: myYDomain,
-                interpolate: "cardinal",
-                height: 500,
+                useInteractiveGuideline: true, // Shows multiline values
+                yDomain: myYDomain, // Y Domain lenght
+                interpolate: "cardinal", // Smoothing the line
+                height: 500, // Height and width of the chart
                 width: 960,
                 showXAxis: true,
                 showYAxis: true,
                 tooltips: true
             });
-        
+        console.log("setting x axis lable")
         chart.xAxis
         .axisLabel('Year')
         
+        console.log("setting y axis lable")
         chart.yAxis
         .axisLabel('Million BTUs per Person')
         d3.select('#chart1 svg')

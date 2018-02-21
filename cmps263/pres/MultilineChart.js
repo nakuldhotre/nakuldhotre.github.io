@@ -30,7 +30,7 @@ d3.csv("BRICSdata.csv", type, function(error, data) {
     };
   });
   console.log(countries);
-
+// Set domains
   x.domain(d3.extent(data, function(d) { return d.year; }));
 
   y.domain([
