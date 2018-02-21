@@ -6689,6 +6689,7 @@ nv.models.line = function() {
 nv.models.lineChart = function() {
     "use strict";
 
+	console.log("entering nv.models.lineChart");
     //============================================================
     // Public Variables with Default Settings
     //------------------------------------------------------------
@@ -6817,6 +6818,7 @@ nv.models.lineChart = function() {
             });
 
             // Setup Scales
+	console.log("nv.models.lineChart setup scales");
             x = lines.xScale();
             y = lines.yScale();
 
@@ -6882,6 +6884,7 @@ nv.models.lineChart = function() {
                 .attr('width', availableWidth)
                 .attr('height', availableHeight);
 
+		console.log("nv.models.lineChart setup lines");
             lines
                 .width(availableWidth)
                 .height(availableHeight)
@@ -6913,6 +6916,7 @@ nv.models.lineChart = function() {
             //============================================================
             function updateXAxis() {
               if(showXAxis) {
+		console.log("nv.models.lineChart.showXAxis");
                 g.select('.nv-focus .nv-x.nv-axis')
                   .transition()
                   .duration(duration)
@@ -6923,6 +6927,7 @@ nv.models.lineChart = function() {
 
             function updateYAxis() {
               if(showYAxis) {
+		console.log("nv.models.lineChart.showYAxis");
                 g.select('.nv-focus .nv-y.nv-axis')
                   .transition()
                   .duration(duration)
