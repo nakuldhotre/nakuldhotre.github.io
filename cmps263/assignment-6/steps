@@ -1,0 +1,26 @@
+#!/bin/bash
+set -x
+wget 'http://www2.census.gov/geo/tiger/GENZ2014/shp/cb_2014_32_tract_500k.zip'
+unzip -o cb_2014_32_tract_500k.zip
+shp2json cb_2014_32_tract_500k.shp -o nv.json
+# Taken from d3-stateplane
+# https://github.com/veltman/d3-stateplane (Nevada Central)
+
+# geoproject 'd3.geoTransverseMercator().rotate([116 + 40 / 60, -34 - 45 / 60]).fitSize([960, 960], d)' < nv.json > nv-merc.json
+geoproject 'd3.geoTransverseMercator().rotate([116 + 40 / 60, -34 - 45 / 60]).fitExtent([[10, 10], [950, 1090]], d)' < nv.json > nv-merc.json
+ndjson-split 'd.features'  < nv-merc.json  > nv-merc.ndjson
+ndjson-map 'd.id = d.properties.GEOID.slice(2), d' < nv-merc.ndjson > nv-merc-id.ndjson
+wget -O cb_2014_32_tract_B01003.json 'http://api.census.gov/data/2014/acs5?get=B01003_001E&for=tract:*&in=state:32'
+ndjson-cat cb_2014_32_tract_B01003.json | ndjson-split 'd.slice(1)' | ndjson-map '{id: d[2] + d[3], B01003: +d[0]}'  > cb_2014_32_tract_B01003.ndjson
+
+ndjson-join 'd.id' nv-merc-id.ndjson cb_2014_32_tract_B01003.ndjson > nv-merc-join.ndjson
+
+ndjson-map 'd[0].properties = {density: Math.floor(d[1].B01003 / d[0].properties.ALAND * 2589975.2356)}, d[0]' < nv-merc-join.ndjson > nv-merc-density.ndjson
+geo2topo -n tracts=nv-merc-density.ndjson > nv-tracts-topo.json
+toposimplify -p 1 -f < nv-tracts-topo.json > nv-simple-topo.json
+topoquantize 1e5 < nv-simple-topo.json > nv-quantized-topo.json
+topomerge -k 'd.id.slice(0, 3)' counties=tracts < nv-quantized-topo.json > nv-merge-topo.json
+topomerge --mesh -f 'a !== b' counties=counties < nv-merge-topo.json > nv-topo.json
+
+# State boundries
+topomerge --mesh -f 'a == b' counties=counties < nv-merge-topo.json > nv-state-topo.json

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8">
+<style>
+    div.legend_button {
+        position: absolute;
+        top:1000px;
+        left:10px
+    }
+    div.state_button {
+        position: absolute;
+        top:1050px;
+        left:10px;
+    }
+    
+    div.tract_button {
+        position: absolute;
+        top:1100px;
+        left:10px;
+    }
+</style>
+<script src="http://d3js.org/d3.v4.js"></script>
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+<script src="https://d3js.org/topojson.v2.min.js"></script>
+</head>
+
+<body>
+<div id="option_1" class="legend_button">
+    <input name="update_legend" 
+           type="button" 
+           value="Change Legend Colors" 
+           onclick="updateLegend()" />
+</div>
+
+<div id="option_2" class="state_button">
+    <input name="update_state" 
+           type="button" 
+           value="Toggle State Boundary" 
+           onclick="updateState()" />
+</div>
+    
+<div id="option_3" class="tract_button">
+    <input name="update_tract" 
+           type="button" 
+           value="Toggle Census Tract Boundary" 
+           onclick="updateTract()" />
+</div>
+<script>
+//https://bl.ocks.org/mbostock/5562380
+var Legend = 1;
+var State = 1;
+var Tract = 0;
+var color_1 = d3.scaleThreshold()
+    .domain([1, 10, 50, 200, 500, 1000, 2000, 4000])
+    .range(d3.schemeOrRd[9]);
+
+var x_1 = d3.scaleSqrt()
+    .domain([0, 4200])
+    .rangeRound([1, 411]);
+
+var color_2 = d3.scaleThreshold()
+    .domain([100, 1000, 2000, 5000, 7500, 10000, 15000, 20000])
+    .range(d3.schemeBuPu[9]);
+
+var x_2 = d3.scaleSqrt()
+    .domain([0, 21000])
+    .rangeRound([1, 411]);
+    
+
+// Default
+color = color_1
+x = x_1
+
+var margin = {top: 50, right: 10, bottom: 20, left: 10};
+var width = 960 - margin.left - margin.right,
+    height = 1200 - margin.top - margin.bottom;
+d3.select("svg").remove();
+var svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+drawMap();
+
+function drawMap()
+{
+   
+    // Clear all elements: https://stackoverflow.com/questions/3674265/is-there-an-easy-way-to-clear-an-svg-elements-contents
+    svg.selectAll("*").remove();
+    
+    // Add Title Source: http://www.d3noob.org/2013/01/adding-title-to-your-d3js-graph.html
+    svg.append("text")
+        .attr("x", (width / 2))             
+        .attr("y", 0 - (margin.top / 2))
+        .attr("text-anchor", "middle")  
+        .style("font-size", "30px")  
+        .text("Nevada Population Density, 2018");
+        
+    
+
+
+var path = d3.geoPath();
+
+
+var g = svg.append("g")
+    .attr("class", "key")
+    .attr("transform", "translate(0,900)");
+
+g.selectAll("rect")
+  .data(color.range().map(function(d) {
+      d = color.invertExtent(d);
+      if (d[0] == null) d[0] = x.domain()[0];
+      if (d[1] == null) d[1] = x.domain()[1];
+      return d;
+    }))
+  .enter().append("rect")
+    .attr("height", 8)
+    .attr("x", function(d) { return x(d[0]); })
+    .attr("width", function(d) { return x(d[1]) - x(d[0]); })
+    .attr("fill", function(d) { return color(d[0]); });
+
+g.append("text")
+    .attr("class", "caption")
+    .attr("x", x.range()[0])
+    .attr("y", -6)
+    .attr("fill", "#000")
+    .attr("text-anchor", "start")
+    .attr("font-weight", "bold")
+    .text("Population per square mile");
+
+g.call(d3.axisBottom(x)
+    .tickSize(13)
+    .tickValues(color.domain()))
+  .select(".domain")
+    .remove();
+    
+d3.json("nv-topo.json", function(error, topology) {
+  if (error) throw error;
+
+  svg.append("g")
+    .selectAll("path")
+    .data(topojson.feature(topology, topology.objects.tracts).features)
+    .enter().append("path")
+      .attr("fill", function(d) { return color(d.properties.density); })
+      .attr("stroke", "#000")
+      .attr("stroke-opacity", function(Tracts) { 
+        if (Tract == 1) {
+            return 0.3;
+        } else {
+            return 0.0;
+        }
+        })
+      .attr("d", path);
+/*
+     .attr("stroke-opacity", function(Tracts) { 
+        if (Tracts) {
+            return 0.3;
+        } else {
+            return 0.0;
+        }
+        })
+        */
+  svg.append("path")
+      .datum(topojson.feature(topology, topology.objects.counties))
+      .attr("fill", "none")
+      .attr("stroke", "#000")
+      .attr("stroke-opacity", 0.3)
+      .attr("d", path);
+});
+    
+
+
+    if (State) {
+    d3.json("nv-state-topo.json", function(error, topology) {
+  if (error) throw error;
+
+  svg.append("path")
+      .datum(topojson.feature(topology, topology.objects.counties))
+      .attr("fill", "none")
+      .attr("stroke", "#000")
+      .attr("stroke-opacity", 0.6)
+      .attr("d", path);
+});
+    }
+
+}
+// Functions to handle buttons
+function updateLegend() {
+    if (Legend == 1) {
+        color = color_2;
+        x = x_2;
+        Legend = 2;
+    } else {
+        color = color_1;
+        x = x_1;
+        Legend = 1;
+    }
+    drawMap();
+}
+
+function updateState() {
+    
+    if (State == 1) {
+        State = 0;
+    } else {
+        State = 1;
+    }
+    drawMap();  
+}
+    
+function updateTract() {
+    
+    if (Tract == 1) {
+        Tract = 0;
+    } else {
+        Tract = 1;
+    }
+    
+    drawMap();
+}
+</script>
+<br>
+<p style="font-size : 150%;">
+Github: <a href="http://nakuldhotre.github.io/cmps263/assignment-6">Link</a>
+<br> Visualization by: Nakul Dhotre
+<br> Instructor: Suresh Lodha
+<br> CMPS 263: Data programming for Visualization
+<br> Winter 2018
+</p>
+</body>
