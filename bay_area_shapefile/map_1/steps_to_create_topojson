@@ -1,0 +1,20 @@
+# Step 1 . Convert json file to ndjson
+ndjson-cat Bay_Area.json| ndjson-split 'd.features' >Bay_Area.ndjson
+
+# Convert GEOID10 to Zip
+ndjson-map 'd.Zip = d.properties.GEOID10, d' < Bay_Area.ndjson >Bay_Area-id.ndjson
+
+#Convert zip data from csv to json
+csvtojson MedianZIP-3-csv.csv > MedianZip-3.json
+# Convert zip data to ndjson
+ndjson-cat MedianZip-3.json > MedianZip-3.ndjson
+# Process ndjson
+ndjson-cat MedianZip-3.ndjson| ndjson-split 'd.slice(1)' > Median-Zip-3-proc.ndjson
+
+# Join Income data to Map
+ndjson-join 'd.Zip' Bay_Area-id.ndjson Median-Zip-3-proc.ndjson > Bay_Area_Income_proc.ndjson
+# ndjson-map 'Object.assign(d[0], d[1])' <Bay_Area_Income_proc.ndjson > Bay_Area_Income.ndjson
+
+ndjson-map 'd[0].properties = {Income: d[1].Median, Pop: d[1].Pop, Zip: d[1].Zip}, d[0]' < Bay_Area_Income_proc.ndjson > Bay_Area_Income2.ndjson
+#Convert to topojson
+geo2topo -n Zip_areas=Bay_Area_Income2.ndjson > Bay_Area_Income.topojson
