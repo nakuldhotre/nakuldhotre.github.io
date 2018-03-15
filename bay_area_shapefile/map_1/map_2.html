@@ -56,7 +56,8 @@ var color_2 = d3.scaleThreshold()
 
 //var svg = d3.select("body").append("svg")
 
-var url = "Bay_Area_new.topojson";
+var topos = ["Bay_Area_new.topojson",
+            "NY/NYC.topojson"];
     
 var csv_files = [
                 "Zip_Zhvi_1bedroom.csv",
@@ -87,7 +88,7 @@ if ((csv_files.length != titles.length) ||
     throw "Array lengths are not same"
 }
 
-// Curr_csv_file allows 
+var curr_topo_file = 0;
 var curr_csv_file = 0;
 var num_csv_files = csv_files.length;
     
@@ -96,18 +97,19 @@ function sendArg(arg, callback)
     callback(null, arg);
 }
 
-function deferDrawMap(topo_url, csv_url, index) {
+function deferDrawMap(topo_index, data_index) {
     d3.queue()
-    .defer(d3.json, topo_url)
-    .defer(d3.csv, csv_url)
-    .defer(sendArg, index)
+    .defer(d3.json, topos[topo_index])
+    .defer(d3.csv, csv_files[data_index])
+    .defer(sendArg, topo_index)
+    .defer(sendArg, data_index)
     .await(DrawMap)
 }
     
-deferDrawMap(url, csv_files[curr_csv_file], curr_csv_file);
+deferDrawMap(curr_topo_file, curr_csv_file);
     
 //DrawMap(svg); 
-function DrawMap(error, bay_area, csv_data, global_key) {
+function DrawMap(error, bay_area, csv_data, topo_index, data_index) {
     if (error) {
         throw error;
     }
@@ -122,6 +124,7 @@ function DrawMap(error, bay_area, csv_data, global_key) {
                              d["2014-11"], d["2015-11"], d["2016-11"], d["2017-11"]]
     });
     //console.log(obj);
+    // Projection changes for different cities
     var projection = d3.geoMercator()
     .center([-122.433701, 37.767683])
     .scale(25000)
@@ -137,7 +140,7 @@ function DrawMap(error, bay_area, csv_data, global_key) {
                         .style("width", width + 'px')
                         .style("height", height + 'px');
         if (i == 0) {
-            title1 = titles[global_key];
+            title1 = titles[data_index];
         } else {
             title1 = "";
         }
@@ -158,11 +161,14 @@ function DrawMap(error, bay_area, csv_data, global_key) {
         .data(topojson.feature(map, map.objects.Zip_areas).features)
         .enter().append("path")
         .attr("fill", function(d) {
+            
+            //console.log(d.properties)
+            //console.log(obj[d.properties.ZIP]);
             var val = obj[d.properties.ZIP][key_metric];
             if (val == 0) {
                 return "lightgrey"
             } else {
-                return colors[global_key](val);
+                return colors[data_index](val);
             }
         })
         .attr("stroke", "black")
@@ -191,7 +197,7 @@ function DrawMap(error, bay_area, csv_data, global_key) {
     if (curr_csv_file < num_csv_files) {
         setTimeout(function() {
             console.log("Delay 5000");
-    deferDrawMap(url, csv_files[curr_csv_file], curr_csv_file);
+    deferDrawMap(topo_index, curr_csv_file);
     }, 5000);
     }
 }
