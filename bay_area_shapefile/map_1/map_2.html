@@ -40,7 +40,6 @@
      <div id='vis'></div>
 <script>
 
-var margin = {top: 50, right: 10, bottom: 20, left: 10};
 var width = 600;
 var height = 500;
 
@@ -71,8 +70,8 @@ var titles = [
               "Price-1BR",
               "Price-2BR",
               "Price-3BR",
-              "Rent-MFamily",
-              "Rent-SFamily",
+              "Rent Multi Family",
+              "Rent-Single Family",
              ];
 
 
@@ -82,20 +81,36 @@ var colors = [color_1,
               color_2,
               color_2,
               ];
+// All arrays must be same size
 if ((csv_files.length != titles.length) ||
     (csv_files.length != colors.length)) {
     throw "Array lengths are not same"
 }
 
+// Curr_csv_file allows 
 var curr_csv_file = 0;
 var num_csv_files = csv_files.length;
+    
+function sendArg(arg, callback)
+{
+    callback(null, arg);
+}
 
-d3.queue()
-    .defer(d3.json, url)
-    .defer(d3.csv, csv_files[curr_csv_file])
+function deferDrawMap(topo_url, csv_url, index) {
+    d3.queue()
+    .defer(d3.json, topo_url)
+    .defer(d3.csv, csv_url)
+    .defer(sendArg, index)
     .await(DrawMap)
+}
+    
+deferDrawMap(url, csv_files[curr_csv_file], curr_csv_file);
+    
 //DrawMap(svg); 
-function DrawMap(error, bay_area, csv_data) {
+function DrawMap(error, bay_area, csv_data, global_key) {
+    if (error) {
+        throw error;
+    }
     var obj = {};
     for (i = 0; i < 100000; i++) {
         obj[i] = [0, 0, 0, 0, 0, 0, 0, 0];
@@ -121,52 +136,62 @@ function DrawMap(error, bay_area, csv_data) {
         var wrapper = visualizationWrapper.append('div')
                         .style("width", width + 'px')
                         .style("height", height + 'px');
-        var title = "";
         if (i == 0) {
-            title = titles[curr_csv_file] + " ";
+            title1 = titles[global_key];
+        } else {
+            title1 = "";
         }
-            createMap(wrapper, bay_area, obj, i, title + (2010 + i));
+        createMap(wrapper, bay_area, obj, i, title1, 2010 + i);
     }
 
-    function createMap(wrapper, map, obj, key_metric, title)
+    function createMap(wrapper, map, obj, key_metric, title1, title2)
     {
         
         var svg = wrapper.append('svg')
                 .attr("width", width)
                 .attr("height", height);
         
-        console.log("Drawing map for " + title)
+        console.log("Drawing map for " + title2)
         svg.append("g")
         .attr("class", "Zip_areas")
         .selectAll("path")
         .data(topojson.feature(map, map.objects.Zip_areas).features)
         .enter().append("path")
-            .attr("fill", function(d) {
+        .attr("fill", function(d) {
             var val = obj[d.properties.ZIP][key_metric];
             if (val == 0) {
                 return "lightgrey"
             } else {
-            return colors[curr_csv_file](val);}})
-            .attr("stroke", "black")
-            .attr("stroke-opacity", 1)
-          .attr("d", path);
+                return colors[global_key](val);
+            }
+        })
+        .attr("stroke", "black")
+        .attr("stroke-opacity", 1)
+        .attr("d", path);
+        
+        svg.append("text")
+        .attr("x", (50))
+        .attr("y", (50))
+        .attr("text-anchor", "left")
+        .style("font-size", "30px")
+        .text(title1); 
         
         svg.append("text")
         .attr("x", (100))
         .attr("y", (height - 50))
-        .attr("text-anchor", "middle")
+        .attr("text-anchor", "left")
         .style("font-size", "30px")
-        .text(title);  
+        .text(title2);  
     }
     
+    
+    // Code to Redraw maps with new data
+    // This can be replaced and call deferDrawMap from Buttons
     curr_csv_file++;
     if (curr_csv_file < num_csv_files) {
         setTimeout(function() {
             console.log("Delay 5000");
-    d3.queue()
-    .defer(d3.json, url)
-    .defer(d3.csv, csv_files[curr_csv_file])
-    .await(DrawMap);
+    deferDrawMap(url, csv_files[curr_csv_file], curr_csv_file);
     }, 5000);
     }
 }
