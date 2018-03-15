@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8">
+<style>
+  body { margin:0;position:fixed;top:0;right:0;bottom:0;left:0; }
+    svg { width:100%; height: 100% }
+    #vis {
+        width: 100%;
+        max-width: 960px;
+        margin: 0 auto;
+    }
+    #vis div {
+        float: left;
+        position: relative;
+    }
+    #vis path {
+        fill: #2ca25f;
+        stroke: #FFF;
+        stroke-width: 1px;
+    }
+    #vis p.legend {
+        width: 100%;
+        text-align: center;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        font-weight: bold;
+        font-size: 11px;
+    }
+</style>
+<script src="https://d3js.org/d3.v4.js"></script>
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+<script src="https://d3js.org/topojson.v2.min.js"></script>
+</head>
+
+<body>
+<script>
+
+var width = 960;
+var height = 500;
+
+
+var color = d3.scaleThreshold()
+    //.domain([10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000])
+    .domain([500, 1000, 1500, 2000, 2500, 3000, 3500, 4000])
+    .range(d3.schemeOrRd[9])
+
+var svg = d3.select("body").append("svg")
+
+var url = "Bay_Area_Income.topojson";
+var csv_file = "Rental-1-zip-csv.csv";
+    
+function convert_median_csv(median_income) {
+    median_income.forEach(function(d) {
+        d.Median =+d.Median;});
+}
+
+var key_metric = 1;    
+d3.queue()
+    .defer(d3.json, url)
+    .defer(d3.csv, csv_file)
+    .await(DrawMap, key_metric)
+//DrawMap(svg);
+
+
+    
+function DrawMap(error, bay_area, median_income) {
+
+    var obj = {};
+    for (i = 0; i < 100000; i++) {
+        obj[i] = [0, 0];
+    }
+    median_income.forEach(function(d) {
+        
+        obj[d.Zip] = [d.rent_2016_12, d.rent_2017_12];
+    });
+    console.log(obj);
+    
+var projection = d3.geoMercator()
+    .center([-122.433701, 37.767683])
+    .scale(25000)
+    .translate([width/2, height/2])
+//console.log(median_income);
+var path = d3.geoPath()
+      .projection(projection);
+    svg.append("g")
+      .attr("class", "Zip_areas")
+    .selectAll("path")
+    .data(topojson.feature(bay_area, bay_area.objects.Zip_areas).features)
+    .enter().append("path")
+        .attr("fill", function(d) {console.log(obj[d.properties.Zip][key_metric]); return color(obj[d.properties.Zip][key_metric]);})
+        .attr("stroke", "#000")
+        .attr("stroke-opacity", 1)
+      .attr("d", path);
+        
+  
+}
+
+
+</script>
+<br>
+<p style="font-size : 150%;">
+Github: <a href="https://nakuldhotre.github.io/cmps263/assignment-6">Link</a>
+<br> Visualization by: Nakul Dhotre
+<br> Instructor: Suresh Lodha
+<br> CMPS 263: Data programming for Visualization
+<br> Winter 2018
+</p>
+</body>
