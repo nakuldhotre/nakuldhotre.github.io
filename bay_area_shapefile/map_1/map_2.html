@@ -123,11 +123,11 @@
 </div>
 <div class="panel panel-default" id="description_container" style="border:1px solid #cecece;" >
 
-        Rising property prices are pushing out people from their homes. Gentrification, the process of renovating and improving a residential district typically old and poorer areas in response to the influx of more affluent residents, has been rapidly accelerating in urban neighborhoods, specifically in the San Francisco area in California. While gentrification improves the quality of life of these neighborhoods, it also adjusts pricing for both renting and owning homes, greatly affecting the affordability. We will explore the evidence of gentrification from 2014 to 2017, in relation to the average income, home sizes (number of rooms and price per sqft), rent, rent to price ratio, etc.
+        Rising property prices are pushing out people from their homes. Gentrification, the process of renovating and improving a residential district typically old and poorer areas in response to the influx of more affluent residents, has been rapidly accelerating in urban neighborhoods, specifically in the San Francisco area in California. While gentrification improves the quality of life of these neighborhoods, it also adjusts pricing for both renting and owning homes, greatly affecting the affordability. We will explore the evidence of gentrification from 2011 to 2017, in relation to the average income, home sizes (number of rooms), rent, rent to price ratio, etc.
         <br/><br/>
         Assumptions: We have previously determined affordability to be the percentage of income that mortability requires. 
         <br/><br/>
-        Analysis: 
+        Analysis: Taking a look at four different years of statistics, 2011, 2013, 2015, and 2017, it is clear for both owning and renting property, that prices have increased drastically. 
 
 </div>
 
@@ -348,34 +348,34 @@ function DrawMap(error, bay_area, csv_data, csv_income_pop, topo_index, data_ind
         .attr("transform", "translate(20,450)");
 
         g.selectAll("rect")
-        .data(colors[data_index].range().map(function(d) {
-        d = colors[data_index].invertExtent(d);
-        if (d[0] == null) d[0] = xs[data_index].domain()[0];
-        if (d[1] == null) d[1] = xs[data_index].domain()[1];
-        return d;
-        }))
-    .enter().append("rect")
-    .attr("height", 8)
-    .attr("x", function(d) { return xs[data_index](d[0]); })
-    .attr("width", function(d) { return xs[data_index](d[1]) - xs[data_index](d[0]); })
-    .attr("fill", function(d) { return colors[data_index](d[0]); });
+            .data(colors[data_index].range().map(function(d) {
+            d = colors[data_index].invertExtent(d);
+            if (d[0] == null) d[0] = xs[data_index].domain()[0];
+            if (d[1] == null) d[1] = xs[data_index].domain()[1];
+            return d;
+            }))
+            .enter().append("rect")
+            .attr("height", 8)
+            .attr("x", function(d) { return xs[data_index](d[0]); })
+            .attr("width", function(d) { return xs[data_index](d[1]) - xs[data_index](d[0]); })
+            .attr("fill", function(d) { return colors[data_index](d[0]); });
 
-        g.append("text")
-    .attr("class", "caption")
-    .attr("x", xs[data_index].range()[0])
-    .attr("y", -6)
-    .attr("fill", "#000")
-    .attr("text-anchor", "start")
-    .attr("font-weight", "bold")
-    .text(legend_titles[data_index]);
+                g.append("text")
+            .attr("class", "caption")
+            .attr("x", xs[data_index].range()[0])
+            .attr("y", -6)
+            .attr("fill", "#000")
+            .attr("text-anchor", "start")
+            .attr("font-weight", "bold")
+            .text(legend_titles[data_index]);
 
-    var xAxis = d3.axisBottom(xs[data_index])
-                .tickSize(10)
-                .tickValues(colors[data_index].domain());
+        var xAxis = d3.axisBottom(xs[data_index])
+                    .tickSize(10)
+                    .tickValues(colors[data_index].domain());
 
-    g.call(xAxis)
-        .select(".domain")
-        .remove();
+        g.call(xAxis)
+            .select(".domain")
+            .remove();
     }
     
     function createMap(wrapper, map, obj, income_pop, key_metric, title1, title2)
