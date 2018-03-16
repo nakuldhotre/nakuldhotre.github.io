@@ -8,6 +8,7 @@ shp2json cb_2014_32_tract_500k.shp -o nv.json
 
 # geoproject 'd3.geoTransverseMercator().rotate([116 + 40 / 60, -34 - 45 / 60]).fitSize([960, 960], d)' < nv.json > nv-merc.json
 geoproject 'd3.geoTransverseMercator().rotate([116 + 40 / 60, -34 - 45 / 60]).fitExtent([[10, 10], [950, 1090]], d)' < nv.json > nv-merc.json
+geoproject  'd3.geoMercator().center([-122.433701, 37.767683]).scale(25000).translate([960/2, 500/2])' < Bay_Area.json >Bay_Area-merc.json
 ndjson-split 'd.features'  < nv-merc.json  > nv-merc.ndjson
 ndjson-map 'd.id = d.properties.GEOID.slice(2), d' < nv-merc.ndjson > nv-merc-id.ndjson
 wget -O cb_2014_32_tract_B01003.json 'http://api.census.gov/data/2014/acs5?get=B01003_001E&for=tract:*&in=state:32'
@@ -24,3 +25,33 @@ topomerge --mesh -f 'a !== b' counties=counties < nv-merge-topo.json > nv-topo.j
 
 # State boundries
 topomerge --mesh -f 'a == b' counties=counties < nv-merge-topo.json > nv-state-topo.json
+
+
+
+# Step 1 . Convert shp file to ndjson
+ndjson-cat Bay_Area.json| ndjson-split 'd.features' >Bay_Area.ndjson
+
+# Convert GEOID10 to Zip
+ndjson-map 'd.Zip = d.properties.GEOID10, d' < Bay_Area.ndjson >Bay_Area-id.ndjson
+
+#Convert zip data from csv to json
+csvtojson MedianZIP-3-csv.csv > MedianZip-3.json
+# Convert zip data to ndjson
+ndjson-cat MedianZip-3.json > MedianZip-3.ndjson
+# Process ndjson
+ndjson-cat MedianZip-3.ndjson| ndjson-split 'd.slice(1)' > Median-Zip-3-proc.ndjson
+
+# Join Income data to Map
+ndjson-join 'd.Zip' Bay_Area-id.ndjson Median-Zip-3-proc.ndjson > Bay_Area_Income_proc.ndjson
+# ndjson-map 'Object.assign(d[0], d[1])' <Bay_Area_Income_proc.ndjson > Bay_Area_Income.ndjson
+
+ndjson-map 'd[0].properties = {Income: d[1].Median, Pop: d[1].Pop, Zip: d[1].Zip}, d[0]' < Bay_Area_Income_proc.ndjson > Bay_Area_Income2.ndjson
+
+
+csvtojson Rental-1-zip-csv.csv > Rental-1-zip.json
+
+ndjson-cat Rental-1-zip.json > Rental-1-zip.ndjson
+ndjson-cat Rental-1-zip.ndjson | ndjson-split  'd.slice(1)' > Rental-1-zip-proc.ndjson
+
+ndjson-join 'd.Zip' Median-Zip-3-proc.ndjson Rental-1-zip-proc.ndjson > test
+

@@ -412,8 +412,8 @@ function DrawMap(error, bay_area, csv_data, csv_income_pop, topo_index, data_ind
         .attr("stroke-opacity", 1)
         .attr("d", path)
         .on('mouseover', function(d){
-           // var val = obj[d.properties.ZIP][key_metric];
-            //d.properties.val = val;
+           var val = obj[d.properties.ZIP][key_metric];
+            d.properties.val = val;
             tip.show(d);
         })
         .on('mouseout', function(d){
