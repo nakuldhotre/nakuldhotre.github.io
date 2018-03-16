@@ -31,6 +31,7 @@
         font-size: 11px;
     }
     .container {
+         width:1300px;
          padding-right:5px;
          padding-left:5px;
          margin-right:auto;
@@ -101,6 +102,10 @@
       top: 50%;
       left: 100%;
     }
+
+    .hidden{ 
+        display: none; 
+    }
 </style>
 <script src="https://d3js.org/d3.v4.js"></script>
 <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
@@ -111,7 +116,8 @@
 <script src="d3-tip.js"></script>
 </head>
 
-<div class="container">
+<div class="container" style="width:1470px">
+
 <div align="center">
   <h1 title="Gentrification">San Francisco Gentrification: Property Trends of 2011-2017</h1>
 </div>
@@ -125,8 +131,16 @@
 
 </div>
 
-    <div class="panel panel-default" id="options_container" style="width:40%; float:right;">
-        <div id="ownership_dropdown">
+    <div class="panel panel-default" id="options_container" style="width:400px; float:right; height:200px">
+        <div id="own_or_rent">
+            <label>I am looking to:</label>
+            <label class="radio-inline"><input type="radio" name="ownrentradio" id="own_rent_1" value="1">Own Property
+            </label>
+            <label class="radio-inline"><input type="radio" name="ownrentradio" id="own_rent_2" value="2">Rent Property
+            </label>
+        </div>
+        <br/>
+        <div class="hidden" id="ownership_dropdown" style="">
 
             <label>Ownership Options:</label>
             <select class="dropdown" name="ownership_options" id="ownership_options" style="width:200px"> 
@@ -137,7 +151,7 @@
             </select>
         </div>
         <br/>
-        <div id="own_radio">
+        <div class="hidden" id="own_radio">
             <label>Ownership Rooms:</label>
             <br/>
             <label class="radio-inline"><input type="radio" name="ownoptradio" id="own_1" value="1">1 Bedroom
@@ -148,7 +162,7 @@
             </label>
         </div>
         <br/>
-        <div id="ownership_dropdown">
+        <div class="hidden" id="rent_dropdown">
             <label>Rental Options:</label>
             <select class="dropdown" name="rental_options" id="rental_options" style="width:200px"> 
                 <option value="%">---------</option>
@@ -156,7 +170,7 @@
             </select>
         </div>
         <br/>
-        <div id="room_radio">
+        <div class="hidden" id="room_radio">
             <label>Rental Options:</label>
             <label class="radio-inline"><input type="radio" name="optradio" id="radio_1" value="1">Multiple Family
             </label>
@@ -182,7 +196,7 @@ var tip = d3.tip()
                 +"<strong>Population: </strong><span class='details'>" + format(d.properties.pop) +"</span>";
             })
 
-var width = 600;
+var width = 500;
 var height = 500;
 var color_1 = d3.scaleThreshold()
     //.domain([10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000])
@@ -439,6 +453,40 @@ function DrawMap(error, bay_area, csv_data, csv_income_pop, topo_index, data_ind
 }
 
 
+$("#own_or_rent").change(function(){
+    var own_or_rent = $("input[name='ownrentradio']:checked").val();
+    console.log("own_or_rent", own_or_rent);
+
+    if (own_or_rent == 1){
+        /* Show Own */
+        $('#ownership_dropdown').removeClass('hidden');
+        $('#own_radio').removeClass('hidden');
+
+        //clear_rent_options();
+        document.getElementById("rent_dropdown").value = 0;
+        $("#radio_1").prop("checked", false);
+        $("#radio_2").prop("checked", false);
+        $('#rent_dropdown').addClass('hidden');
+        $('#room_radio').addClass('hidden');
+
+    }
+    else if (own_or_rent == 2){
+        /* Modify to show 2 bed */
+        
+        $('#rent_dropdown').removeClass('hidden');
+        $('#room_radio').removeClass('hidden');
+
+        //clear_own_options();
+
+        $('#ownership_dropdown').addClass('hidden');
+        $('#own_radio').addClass('hidden');
+        $("#own_1").prop("checked", false);
+        $("#own_2").prop("checked", false);
+        $("#own_3").prop("checked", false);
+    }
+
+});
+
 $("#ownership_options").change(function(){
     var ownership_option = $( "#ownership_options" ).val();
     console.log("ownership_option", ownership_option);
@@ -446,7 +494,7 @@ $("#ownership_options").change(function(){
     if (ownership_option == 1){
         /* Modify to show median listing price */
         deferDrawMap(0, 0);
-        $("#own_1").prop("checked", true);
+        /*$("#own_1").prop("checked", true);*/
     }
     else if (ownership_option == 2){
         /* Modify to show mortgage */
@@ -487,7 +535,7 @@ $("#rental_options").change(function(){
     if (rental_option == 1){
 
         /*Autoselect 1 bedroom */
-        $("#radio_1").prop("checked", true);
+        /*$("#radio_1").prop("checked", true);*/
         deferDrawMap(0, 3);
 
         /* Modify to show rental price */
