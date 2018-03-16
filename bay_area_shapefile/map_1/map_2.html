@@ -177,7 +177,9 @@ var tip = d3.tip()
             .offset([-10, 0])
             .html(function(d) {
               return "<strong>City: </strong><span class='details'>" + d.properties.PO_NAME + "<br></span>" + "<strong>Zip: </strong><span class='details'>" + format(d.properties.ZIP) +"<br></span>"
-               +"<strong>" + d.properties.metric +": </strong><span class='details'>" + format(d.properties.val) +"</span>";
+               +"<strong>" + d.properties.metric +": </strong><span class='details'>" + format(d.properties.val) +"<br></span>"
+                +"<strong>Income: </strong><span class='details'>" + format(d.properties.income) +"<br></span>"
+                +"<strong>Population: </strong><span class='details'>" + format(d.properties.pop) +"</span>";
             })
 
 var width = 600;
@@ -269,6 +271,7 @@ function deferDrawMap(topo_index, data_index) {
     d3.queue()
     .defer(d3.json, topos[topo_index])
     .defer(d3.csv, csv_files[data_index])
+    .defer(d3.csv, "MedianZIP-3-csv.csv")
     .defer(sendArg, topo_index)
     .defer(sendArg, data_index)
     .await(DrawMap)
@@ -277,7 +280,7 @@ function deferDrawMap(topo_index, data_index) {
 deferDrawMap(curr_topo_file, curr_csv_file);
     
 //DrawMap(svg); 
-function DrawMap(error, bay_area, csv_data, topo_index, data_index) {
+function DrawMap(error, bay_area, csv_data, csv_income_pop, topo_index, data_index) {
     if (error) {
         throw error;
     }
@@ -291,6 +294,15 @@ function DrawMap(error, bay_area, csv_data, topo_index, data_index) {
     csv_data.forEach(function(d) {
         obj[d.RegionName] = [d["2011-11"], d["2013-11"], d["2015-11"], d["2017-11"]];
     });
+    
+    var income_pop = {};
+    for (i = 0; i < 100000; i++) {
+        income_pop[i] = [0, 0];
+    }
+    csv_income_pop.forEach(function(d) {
+        income_pop[d.Zip] = [d["Median"], d["Pop"]];                       
+    });
+    
     //console.log(obj);
     // Projection changes for different cities
     var projection = d3.geoMercator()
@@ -312,7 +324,7 @@ function DrawMap(error, bay_area, csv_data, topo_index, data_index) {
         } else {
             title1 = "";
         }
-        createMap(wrapper, bay_area, obj, i, title1, 2011 + i*2);
+        createMap(wrapper, bay_area, obj, income_pop, i, title1, 2011 + i*2);
     }
     
     function showLegend(svg)
@@ -352,7 +364,7 @@ function DrawMap(error, bay_area, csv_data, topo_index, data_index) {
         .remove();
     }
     
-    function createMap(wrapper, map, obj, key_metric, title1, title2)
+    function createMap(wrapper, map, obj, income_pop, key_metric, title1, title2)
     {
 
 
@@ -370,6 +382,9 @@ function DrawMap(error, bay_area, csv_data, topo_index, data_index) {
         .attr("fill", function(d) {
             d.properties.val = obj[d.properties.ZIP][key_metric];
             d.properties.metric = csv_metric[data_index];
+            d.properties.income = income_pop[d.properties.ZIP][0];
+            d.properties.pop = income_pop[d.properties.ZIP][1];
+           
             //console.log(d.properties)
             //console.log(obj[d.properties.ZIP]);
             var val = obj[d.properties.ZIP][key_metric];
