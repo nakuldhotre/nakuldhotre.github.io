@@ -41,6 +41,66 @@
         padding: 15px;
         width:100%;
     }
+    
+    /* Tooltip CSS */
+    .d3-tip {
+    line-height: 1.5;
+    font-weight: 400;
+    font-family:"avenir next", Arial, sans-serif;
+    padding: 6px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #FFA500;
+    border-radius: 1px;
+    pointer-events: none;
+    }
+
+    //Source http://bl.ocks.org/micahstubbs/8e15870eb432a21f0bc4d3d527b2d14f
+    /* Creates a small triangle extender for the tooltip */
+/*    .d3-tip:after {      
+      box-sizing: border-box;
+      display: inline;
+      font-size: 8px;
+      width: 100%;
+      line-height: 1.5;
+      color: rgba(0, 0, 0, 0.6);
+      position: absolute;
+      pointer-events: none;
+      
+    }
+  */  
+    /* Northward tooltips */
+    .d3-tip.n:after {
+      content: "\25BC";
+      margin: -1px 0 0 0;
+      top: 100%;
+      left: 0;
+      text-align: center;
+    }
+
+    /* Eastward tooltips */
+    .d3-tip.e:after {
+      content: "\25C0";
+      margin: -4px 0 0 0;
+      top: 50%;
+      left: -8px;
+    }
+
+    /* Southward tooltips */
+    .d3-tip.s:after {
+      content: "\25B2";
+      margin: 0 0 1px 0;
+      top: -8px;
+      left: 0;
+      text-align: center;
+    }
+
+    /* Westward tooltips */
+    .d3-tip.w:after {
+      content: "\25B6";
+      margin: -4px 0 0 -1px;
+      top: 50%;
+      left: 100%;
+    }
 </style>
 <script src="https://d3js.org/d3.v4.js"></script>
 <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
@@ -48,11 +108,12 @@
 <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.6/css/bootstrap.min.css">
 <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.12.4.min.js"></script>
 <script src="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.6/bootstrap.min.js"></script>
+<script src="d3-tip.js"></script>
 </head>
 
 <div class="container">
 <div align="center">
-  <h1 title="Gentrification">San Francisco Gentrification: Property Trends of 2014-2017</h1>
+  <h1 title="Gentrification">San Francisco Gentrification: Property Trends of 2011-2017</h1>
 </div>
 <div class="panel panel-default" id="description_container" style="border:1px solid #cecece;" >
 
@@ -109,6 +170,16 @@
 <body>
      <div id='vis'></div>
 <script>
+// Set tooltips
+var format = d3.format("");
+var tip = d3.tip()
+            .attr('class', 'd3-tip')
+            .offset([-10, 0])
+            .html(function(d) {
+              return "<strong>City: </strong><span class='details'>" + d.properties.PO_NAME + "<br></span>" + "<strong>Zip: </strong><span class='details'>" + format(d.properties.ZIP) +"<br></span>"
+               +"<strong>" + d.properties.metric +": </strong><span class='details'>" + format(d.properties.val) +"</span>";
+            })
+
 var width = 600;
 var height = 500;
 var color_1 = d3.scaleThreshold()
@@ -157,6 +228,15 @@ var legend_titles = [
     "Rent in dollars",
     
 ]
+
+var csv_metric = [
+    "Price",
+    "Price",
+    "Price",
+    "Rent",
+    "Rent",
+];
+
 var colors = [color_1,
               color_1,
               color_1,
@@ -280,7 +360,7 @@ function DrawMap(error, bay_area, csv_data, topo_index, data_index) {
         var svg = wrapper.append('svg')
                 .attr("width", width)
                 .attr("height", height);
-        
+        svg.call(tip);
         //console.log("Drawing map for " + title2)
         svg.append("g")
         .attr("class", "Zip_areas")
@@ -288,7 +368,8 @@ function DrawMap(error, bay_area, csv_data, topo_index, data_index) {
         .data(topojson.feature(map, map.objects.Zip_areas).features)
         .enter().append("path")
         .attr("fill", function(d) {
-            
+            d.properties.val = obj[d.properties.ZIP][key_metric];
+            d.properties.metric = csv_metric[data_index];
             //console.log(d.properties)
             //console.log(obj[d.properties.ZIP]);
             var val = obj[d.properties.ZIP][key_metric];
@@ -300,7 +381,15 @@ function DrawMap(error, bay_area, csv_data, topo_index, data_index) {
         })
         .attr("stroke", "black")
         .attr("stroke-opacity", 1)
-        .attr("d", path);
+        .attr("d", path)
+        .on('mouseover', function(d){
+           // var val = obj[d.properties.ZIP][key_metric];
+            //d.properties.val = val;
+            tip.show(d);
+        })
+        .on('mouseout', function(d){
+            tip.hide(d);
+        })
         
 
         /*Creates the title */
