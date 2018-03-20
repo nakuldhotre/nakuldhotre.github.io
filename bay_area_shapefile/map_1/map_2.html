@@ -30,7 +30,7 @@
         font-weight: bold;
         font-size: 11px;
     }
-    
+
        //http://bl.ocks.org/micahstubbs/8e15870eb432a21f0bc4d3d527b2d14f
     #vis tooltip {
     line-height: 1.5;
@@ -43,7 +43,18 @@
     pointer-events: none;
   /*  text-align: right;*/
     }
-    
+
+    .hidden{
+        display: none;
+    }
+
+    .details {
+        text-align: left;
+    }
+    .right {
+        text-align: right;
+    }
+
     .container {
          width:1300px;
          padding-right:5px;
@@ -51,29 +62,15 @@
          margin-right:auto;
          margin-left:auto;
     }
-    
+
 
     #options_container, #description_container, #srcs_container {
         padding: 15px;
         width:100%;
     }
-    
-    /* Tool CSS */
 
 
-    .tooltip-inner {
-        text-align: left;
-    }
 
- 
-
-    .hidden{ 
-        display: none; 
-    }
-
-    .details {
-        text-align: left;
-    }
     pre { white-space: pre; }
 
 </style>
@@ -94,9 +91,9 @@
 
         Rising property prices are pushing out people from their homes. Gentrification, the process of renovating and improving a residential district typically old and poorer areas in response to the influx of more affluent residents, has been rapidly accelerating in urban neighborhoods, specifically in the San Francisco area in California. While gentrification improves the quality of life of these neighborhoods, it also adjusts pricing for both renting and owning homes, greatly affecting the affordability. We will explore the evidence of gentrification from 2011 to 2017, in relation to the average income, home sizes (number of rooms), rent, rent to price ratio, etc.
         <br/><br/>
-        Assumptions: We have previously determined affordability to be the percentage of income that mortability requires. 
+        Assumptions: We have previously determined affordability to be the percentage of income that mortability requires.
         <br/><br/>
-        Analysis: Taking a look at four different years of statistics, 2011, 2013, 2015, and 2017, it is clear for both owning and renting property, that prices have increased drastically. 
+        Analysis: Taking a look at four different years of statistics, 2011, 2013, 2015, and 2017, it is clear for both owning and renting property, that prices have increased drastically.
 
 </div>
     <div class="panel panel-default" style="width:1040px; float:left; height:50px">
@@ -119,7 +116,7 @@
             <button id="rent_price_1">Single Family </button>
             <button id="rent_price_2">Multiple Family </button>
         </div>
-   
+
         </div>
     </div>
 
@@ -167,7 +164,7 @@ var color_3 = d3.scaleThreshold()
 var x_3 = d3.scaleLinear()
     .domain([0, 185])
     .rangeRound([1, 400]);
-    
+
 var color_4 = d3.scaleThreshold()
             .domain([10, 20, 30, 40, 50, 60, 75, 100])
             .range(d3.schemeOranges[9])
@@ -187,7 +184,7 @@ var x_5 = d3.scaleSqrt()
 //var svg = d3.select("body").append("svg")
 var topos = ["Bay_Area_new.topojson",
             "NY/NYC.topojson"];
-    
+
 var csv_files = [
                 "Zip_Zhvi_1bedroom.csv",
                 "Zip_Zhvi_2bedroom.csv",
@@ -195,7 +192,7 @@ var csv_files = [
                 "Zip_Zri_MultiFamilyResidenceRental.csv",
                 "Zip_Zri_SingleFamilyResidenceRental.csv",
                 ];
-    
+
 var titles = [
               "Price of 1 Bedroom Home", //Price-1BR",
               "Price of 2 Bedroom Home", //"Price-2BR",
@@ -209,7 +206,7 @@ var legend_titles = [
     "Price in USD",
     "Rent in USD",
     "Rent in USD",
-    
+
 ]
 
 var csv_metric = [
@@ -243,7 +240,7 @@ var xs_num = [x_1,
           x_5,
           x_2,
          ];
-    
+
 var xs_pct = [x_3,
           x_3,
           x_3,
@@ -259,7 +256,7 @@ var curr_topo_file = 0;
 var curr_csv_file = 0;
 var num_csv_files = csv_files.length;
 console.log("here");
-    
+
 function sendArg(arg, callback)
 {
     callback(null, arg);
@@ -274,10 +271,10 @@ function deferDrawMap(topo_index, data_index) {
     .defer(sendArg, data_index)
     .await(DrawMap)
 }
-    
+
 deferDrawMap(curr_topo_file, curr_csv_file);
-    
-//DrawMap(svg); 
+
+//DrawMap(svg);
 function DrawMap(error, bay_area, csv_data, csv_income_pop, topo_index, data_index) {
     if (error) {
         throw error;
@@ -287,7 +284,7 @@ function DrawMap(error, bay_area, csv_data, csv_income_pop, topo_index, data_ind
     for (i = 0; i < 100000; i++) {
         obj[i] = [0, 0, 0, 0];
     }
-    
+
     // Property Data
     csv_data.forEach(function(d) {
         obj[d.RegionName] = [d["2011-11"],
@@ -296,15 +293,15 @@ function DrawMap(error, bay_area, csv_data, csv_income_pop, topo_index, data_ind
                              ((d["2017-11"] - d["2011-11"])/ d["2011-11"]) * 100,
                             ];
     });
-    
+
     var income_pop = {};
     for (i = 0; i < 100000; i++) {
         income_pop[i] = [0, 0];
     }
     csv_income_pop.forEach(function(d) {
-        income_pop[d.Zip] = [d["Median"], d["Pop"]];                       
+        income_pop[d.Zip] = [d["Median"], d["Pop"]];
     });
-    
+
     //console.log(obj);
     // Projection changes for different cities
     var projection = d3.geoMercator()
@@ -315,7 +312,7 @@ function DrawMap(error, bay_area, csv_data, csv_income_pop, topo_index, data_ind
       .projection(projection);
     var visualizationWrapper = d3.select('#vis');
     visualizationWrapper.selectAll("div").remove();
-    
+
     var unit = "";
     for (i = 0; i < obj[0].length; i++)
     {
@@ -325,14 +322,14 @@ function DrawMap(error, bay_area, csv_data, csv_income_pop, topo_index, data_ind
         if (i == 0) {
             title1 = titles[data_index];
             unit = csv_metric[data_index];
-            
+
         } else {
             unit = "Increase"
             title1 = "";
         }
         createMap(wrapper, bay_area, obj, income_pop, i, title1, 2011 + i*2, unit);
     }
-    
+
     function showLegend(svg, use_pct)
     {
         g = svg.append("g")
@@ -374,9 +371,9 @@ function DrawMap(error, bay_area, csv_data, csv_income_pop, topo_index, data_ind
                  else {
                      return legend_titles[data_index]
                  }});
-        
+
         var xAxis;
-        
+
         if (use_pct) {
             xAxis = d3.axisBottom(xs[data_index])
                     .tickSize(10)
@@ -399,9 +396,9 @@ function DrawMap(error, bay_area, csv_data, csv_income_pop, topo_index, data_ind
             .select(".domain")
             .remove();
     }
-    
+
     function createMap(wrapper, map, obj, income_pop, key_metric, title1, title2, unit)
-    {   
+    {
         var border=1;
         var bordercolor='black';
         var svg = wrapper.append('svg')
@@ -413,7 +410,7 @@ function DrawMap(error, bay_area, csv_data, csv_income_pop, topo_index, data_ind
                       .style("opacity", 0)
                       .style("top", "-180px")
                       .style("left","30px");
-              
+
          var g = svg.append("g")
         .attr("class", "Zip_areas")
         .selectAll("path")
@@ -424,7 +421,7 @@ function DrawMap(error, bay_area, csv_data, csv_income_pop, topo_index, data_ind
             if (Number.isNaN(val)) {
                 val = 0;
             }
-            
+
             if (val == Number.POSITIVE_INFINITY || val ==       Number.NEGATIVE_INFINITY) {
                 val = 0;
             }
@@ -432,10 +429,10 @@ function DrawMap(error, bay_area, csv_data, csv_income_pop, topo_index, data_ind
             d.properties.metric = unit
             d.properties.income = income_pop[d.properties.ZIP][0];
             d.properties.pop = income_pop[d.properties.ZIP][1];
-           
+
             //console.log(d.properties)
             //console.log(obj[d.properties.ZIP]);
-            
+
             if (val == 0 || Number.isNaN(val)) {
                 return "lightgrey"
             } else {
@@ -464,33 +461,33 @@ function DrawMap(error, bay_area, csv_data, csv_income_pop, topo_index, data_ind
                     d.properties.val = currency.format(val)
                 }
             }
-            
+
             //svg.selectAll("div").remove();
-            
+
             //tooldiv = d3.select("#tool-tip");
             tooldiv.selectAll('*').remove();
-            
-            var format = d3.format("");              
-            tooldiv.transition()		
-                .duration(200)		
+
+            var format = d3.format("");
+            tooldiv.transition()
+                .duration(200)
                 .style("opacity",1);
-            tooldiv.html("<pre><class='details' >"+
-                        "<center>" + d.properties.PO_NAME + "</center>" + 
+            tooldiv.html("<pre>"+
+                        "<center>" + d.properties.PO_NAME + "</center>" +
                       "<strong>Zip        : </strong>"+
-                      "<span class='details'>" + format(d.properties.ZIP) + "<br></span>"+
-                      "<strong>" + unit +"   : </strong>"+
-                      "<span class='details'>" + d.properties.val +
-                      "<br></span>"+
-                      "<strong>Income     : </strong><span class='details'>" + 
-                      currency.format(d.properties.income) +"<br></span>"
-                      +"<strong>Population : </strong><span class='details'>" + 
-                      commas.format(d.properties.pop) +"</span>");
-            
+                      "<span style='float:right;'>" + format(d.properties.ZIP) + "</span><br>"+
+                      "<span class ='details'><strong>" + unit +"   : </strong></span>"+
+                      "<span style='float:right;'>" + d.properties.val + "</span><br>"+
+                      "<span class='details'><strong>Income     : </strong></span>"+
+                      "<span style='float:right;'>" + currency.format(d.properties.income) +
+                      "</span><br>" +
+                      "<strong>Population : </strong>" +
+                      "<span style='float:right;'>" + commas.format(d.properties.pop) +"</span>");
+
 
         })
         .on('mouseout', function(d){
-            tooldiv.transition()	
-                .duration(100)		
+            tooldiv.transition()
+                .duration(100)
                 .selectAll('*').remove();
         })
         .on('click', function(d){
@@ -498,7 +495,7 @@ function DrawMap(error, bay_area, csv_data, csv_income_pop, topo_index, data_ind
             city = city.replace(/\s+/g, '-').toLowerCase();
             zillow_url = "https://www.zillow.com/" + city + "-ca-" + d.properties.ZIP + "/home-values/"
             window.open(zillow_url,'_blank');
-            
+
         })
 
         /*Creates the title */
@@ -514,17 +511,17 @@ function DrawMap(error, bay_area, csv_data, csv_income_pop, topo_index, data_ind
         .attr("text-anchor", "left")
         .style("font-size", "30px")
         .text(title1); */
-        
+
         svg.append("text")
         .attr("x", (30))
         .attr("y", (50))
         .attr("text-anchor", "left")
         .style("font-size", "22px")
         .style("opacity", 0.7)
-        .text(title2);  
+        .text(title2);
 
         /*showLegend(svg);*/
-        
+
                 var borderPath = svg.append("rect")
        			.attr("x", 0)
        			.attr("y", 0)
@@ -533,7 +530,7 @@ function DrawMap(error, bay_area, csv_data, csv_income_pop, topo_index, data_ind
        			.style("stroke", bordercolor)
        			.style("fill", "none")
        			.style("stroke-width", 0.5);
-        
+
           var LegendPath = svg.append("rect")
        			.attr("x", 30)
        			.attr("y", height - 50)
@@ -562,11 +559,11 @@ $('#rent_price_2').click(function(){
     deferDrawMap(0, 3);
 });
 
-</script> 
+</script>
 </body>
 <div class="panel panel-default" id="description_container" style="border:1px solid #cecece;" >
     <div class='row'>
-        <div class='col-sm-4'>   
+        <div class='col-sm-4'>
         </div>
     </div>
 
@@ -587,7 +584,7 @@ $('#rent_price_2').click(function(){
         <div class='row'><a href="https://www.zillow.com/howto/api/neighborhood-boundaries.htm">Neighborhood boundries</a></div>
     </div>
     <div class='row'>
-        <div class='col-sm-4'>   
+        <div class='col-sm-4'>
             <label>Visual and Code Sources</label></br>
             <a href="https://github.com/d3/d3/blob/master/API.md">D3 API Reference</a>
             <a hrerf="https://sureshlodha.github.io/CMPS165_Fall2016_FinalProjects/SantaCruzUrbanDisplacement/Urban-Displacement-Santa-Cruz/">Urban Displacement in Santa Cruz County CMPS165 Fall 2016 Project</a>
