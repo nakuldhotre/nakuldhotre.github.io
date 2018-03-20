@@ -116,6 +116,11 @@
             <button id="rent_price_1">Single Family </button>
             <button id="rent_price_2">Multiple Family </button>
         </div>
+        <div id="loading" style="opacity:0">
+            <br>
+            <!-- Loading gif taken from http://loadinggif.com/ -->
+            <strong>Fetching Data...</strong><img src="loading.gif" width="20" height="20">
+        </div>
 
         </div>
     </div>
@@ -263,6 +268,9 @@ function sendArg(arg, callback)
 }
 function deferDrawMap(topo_index, data_index) {
     console.log("Calling deferDrawMap")
+    loadingdiv = d3.select("#loading");
+    loadingdiv.style("opacity", 1);
+    
     d3.queue()
     .defer(d3.json, topos[topo_index])
     .defer(d3.csv, csv_files[data_index])
@@ -540,6 +548,8 @@ function DrawMap(error, bay_area, csv_data, csv_income_pop, topo_index, data_ind
        			.style("fill", "none")
        			.style("stroke-width", 0.25);
     }
+    loadingdiv = d3.select("#loading");
+    loadingdiv.style("opacity", 0);
 }
 
 
