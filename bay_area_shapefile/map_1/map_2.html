@@ -481,15 +481,15 @@ function DrawMap(error, bay_area, csv_data, csv_income_pop, topo_index, data_ind
                 .duration(200)
                 .style("opacity",1);
             tooldiv.html("<pre>"+
-                        "<center>" + d.properties.PO_NAME + "</center>" +
-                      "<strong>Zip        : </strong>"+
+                        "<strong><center>" + d.properties.PO_NAME + "</center></strong>" +
+                      "Zip        : "+
                       "<span style='float:right;'>" + format(d.properties.ZIP) + "</span><br>"+
-                      "<span class ='details'><strong>" + unit +"   : </strong></span>"+
+                      "<span class ='details'>" + unit +"   : </span>"+
                       "<span style='float:right;'>" + d.properties.val + "</span><br>"+
-                      "<span class='details'><strong>Income     : </strong></span>"+
+                      "<span class='details'>Income     : </span>"+
                       "<span style='float:right;'>" + currency.format(d.properties.income) +
                       "</span><br>" +
-                      "<strong>Population : </strong>" +
+                      "Population : " +
                       "<span style='float:right;'>" + commas.format(d.properties.pop) +"</span>");
 
 

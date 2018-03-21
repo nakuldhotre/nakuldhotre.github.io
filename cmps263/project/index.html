@@ -91,9 +91,9 @@
 </div>
 <div class="panel panel-default" id="description_container" style="border:1px solid #cecece;" >
 
-        Rising property prices are pushing out people from their homes. Gentrification, the process of renovating and improving a residential district in typically old and poorer areas in response to the influx of more affluent residents, has been rapidly accelerating in urban neighborhoods, specifically in the San Francisco Bay Area in California. Gentrification makes the neighborhoods more attractive for the rich and displaces communities living in these neighborhoods for a long time due to steep price increase. We explore gentrification through the lens of owners (by visualizing median home prices) and renters (by visualizing rental prices).
+        Rising property prices are pushing out people from their homes. Gentrification, the process of renovating and improving a residential district in typically old and poorer areas in response to the influx of more affluent residents, has been rapidly accelerating in urban neighborhoods, specifically in the San Francisco Bay Area in California. Gentrification makes the neighborhoods more attractive for the rich and displaces communities living in these neighborhoods for a long time due to a steep price increase. We explore gentrification through the lens of owners (by visualizing median home prices) and renters (by visualizing rental prices).
         <br/><br/>
-	Analysis: Considering 2011 prices as baseline, and mapping percent price difference in 2013, 2015 and 2017, it is clear that many areas have experience tremendous price increases. Most of City of San Francisco has seen home prices doubling and rents increase by at lease 50%. A side effect of this was that relatively poorer and cheaper areas in the East Bay (e.g. ZIP Codes 94606 and 94601 in Oakland) experienced even higher percentage price rise.
+	Analysis: Considering 2011 prices as a baseline, and mapped percent price difference in 2013, 2015 and 2017, it is clear that many areas have experienced tremendous price increases. Most of the City of San Francisco has seen home prices doubling and rents increase by at least 50%. A side effect of this was that relatively poorer and cheaper areas in the East Bay (e.g. ZIP Codes 94606 and 94601 in Oakland) experienced even higher percentage price rise.
 </div>
     <div style="width:1040px; float:left; border:none">
         <div id="title_container" align="center" padding="20px">
@@ -592,6 +592,7 @@ $('#rent_price_2').click(function(){
         <div class='row'>CA_Zip_Zhvi_3bedroom.csv</div>
         <div class='row'>CA_Zip_Zri_MultiFamilyResidenceRental.csv</div>
         <div class='row'>CA_Zip_Zri_SingleFamilyResidenceRental.csv</div>
+        <div class='row'>loading.gif</div>
     </div>
     <div class='col-sm-4'>
         <div class='row'><label>Data Sources</label></div>
@@ -599,15 +600,14 @@ $('#rent_price_2').click(function(){
         <div class='row'><a href="http://files.zillowstatic.com/research/public/Zip.zip">Zillow Research Data (Property Data by ZIP Code)</a></div>
         <div class='row'><a href="https://earthworks.stanford.edu/catalog/ark28722-s7888q">Bay Area ZIP Code Shapefile</a></div>
         <div class='row'><a href="https://earthworks.stanford.edu/catalog/ark28722-s7888q">Bay Area ZIP Code Shapefile</a></div>
-        <div class='row'><a href="https://earthworks.stanford.edu/catalog/sde-columbia-doitt_zip_codes_2009"> New York City Zip Code Shapefile</a></div>
-        <div class='row'><a href="https://www.zillow.com/howto/api/neighborhood-boundaries.htm">Neighborhood boundries</a></div>
+        <div class='row'><a href="https://www.psc.isr.umich.edu/dis/census/Features/tract2zip/">Median Household Income by ZIP Code</a></div>
     </div>
     <div class='row'>
         <div class='col-sm-4'>
             <label>Visual and Code Sources</label></br>
-            <a href="https://github.com/d3/d3/blob/master/API.md">D3 API Reference</a>
-            <a hrerf="https://sureshlodha.github.io/CMPS165_Fall2016_FinalProjects/SantaCruzUrbanDisplacement/Urban-Displacement-Santa-Cruz/">Urban Displacement in Santa Cruz County CMPS165 Fall 2016 Project</a>
-            <a href="http://frankbowers24.github.io/">Bay Area Stats using D3</a>
+            <a href="https://github.com/d3/d3/blob/master/API.md">D3 API Reference</a><br>
+            <a hrerf="https://sureshlodha.github.io/CMPS165_Fall2016_FinalProjects/SantaCruzUrbanDisplacement/Urban-Displacement-Santa-Cruz/">Urban Displacement in Santa Cruz County CMPS165 Fall 2016 Project</a><br>
+            <a href="http://frankbowers24.github.io/">Bay Area Stats using D3</a><br>
             <a href="http://www.urbandisplacement.org/map/sf"> Urban Displacement Project: SF Map</a>
         </div>
     </div>
