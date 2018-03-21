@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8">
+<style>
+  body {
+        margin: 0;
+        padding: 0;
+    }
+    #vis {
+ //   width: 100%;
+   // max-width: 2000px;
+//    max-height: 2000px;
+ //   margin: 0 auto;
+    }
+    #vis div {
+        float: left;
+        position: relative;
+    }
+    #vis path {
+       /* //fill: #2ca25f;
+        //stroke: #FFF;*/
+        stroke-width: 1px;
+    }
+    #vis p.legend {
+        width: 100%;
+        text-align: center;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        font-weight: bold;
+        font-size: 11px;
+    }
+
+       //http://bl.ocks.org/micahstubbs/8e15870eb432a21f0bc4d3d527b2d14f
+    #vis tooltip {
+    line-height: 1.5;
+    font-weight: 400;
+    font-family:"avenir next", Arial, sans-serif;
+    padding: 6px;
+    background: #e7e3e3; /*rgba(0, 0, 0, 0.6);*/
+    color: #000000;/*#FFA500;*/
+    border-radius: 1px;
+    pointer-events: none;
+  /*  text-align: right;*/
+    }
+
+    .hidden{
+        display: none;
+    }
+
+    .details {
+        text-align: left;
+    }
+    .right {
+        text-align: right;
+    }
+
+    .container {
+         width:1300px;
+         padding-right:5px;
+         padding-left:5px;
+         margin-right:auto;
+         margin-left:auto;
+        stroke-width: 0px;
+    }
+
+
+    #options_container, #description_container, #srcs_container {
+        padding: 15px;
+        width:100%;
+    }
+
+
+
+    pre { white-space: pre; }
+
+</style>
+<script src="https://d3js.org/d3.v4.js"></script>
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+<script src="https://d3js.org/topojson.v2.min.js"></script>
+<link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.6/css/bootstrap.min.css">
+<script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.12.4.min.js"></script>
+<script src="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.6/bootstrap.min.js"></script>
+</head>
+
+<div class="container" style="width:1350px">
+
+<div align="center">
+  <h1 title="Gentrification">San Francisco Gentrification, 2011-2017</h1>
+</div>
+<div class="panel panel-default" id="description_container" style="border:1px solid #cecece;" >
+
+        Rising property prices are pushing out people from their homes. Gentrification, the process of renovating and improving a residential district typically old and poorer areas in response to the influx of more affluent residents, has been rapidly accelerating in urban neighborhoods, specifically in the San Francisco area in California. While gentrification improves the quality of life of these neighborhoods, it also adjusts pricing for both renting and owning homes, greatly affecting the affordability. We will explore the evidence of gentrification from 2011 to 2017, in relation to the average income, home sizes (number of rooms), rent, rent to price ratio, etc.
+        <br/><br/>
+        Assumptions: We have previously determined affordability to be the percentage of income that mortability requires.
+        <br/><br/>
+        Analysis: Taking a look at four different years of statistics, 2011, 2013, 2015, and 2017, it is clear for both owning and renting property, that prices have increased drastically.
+
+</div>
+    <div style="width:1040px; float:left; border:none">
+        <div id="title_container" align="center" padding="20px">
+
+            <h3 id="graph_title"></h3>
+        </div>
+    </div>
+    <div style="width:280px; float:right; height:200px">
+        <div style="height:55px;"></div>
+        <center>
+        <div class="panel panel-default" align="center" style="width:270px; height: 130px;">
+        <div id="ownership_dropdown" style="">
+            <label align="center">Median Home Prices</label><br/>
+            <button id="home_price_1">1 Bedroom </button>
+            <button id="home_price_2">2 Bedroom </button>
+            <button id="home_price_3">3 Bedroom </button>
+        </div>
+        <br/>
+        <div id="own_radio">
+            <label align="center">Rental Home Prices</label><br/>
+            <button id="rent_price_1">Single Family </button>
+            <button id="rent_price_2">Multiple Family </button>
+        </div>
+        <div id="loading" style="opacity:0">
+            <br>
+            <!-- Loading gif taken from http://loadinggif.com/ -->
+            <strong>Fetching Data...</strong><img src="loading.gif" width="20" height="20">
+        </div>
+        </div>
+            </center>
+
+    </div>
+
+
+<body>
+     <div id='vis'></div>
+<script>
+// Set tooltips
+
+var currency = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0
+});
+
+var commas = new Intl.NumberFormat('en-US', {
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0
+});
+
+var margin = {top: 0, right: 0, bottom: 0, left: 0};
+
+var width = 520 - margin.left - margin.right;
+var height = 520 - margin.top - margin.bottom;
+var color_1 = d3.scaleThreshold()
+    .domain([300000, 400000, 500000, 600000, 700000, 800000, 900000, 1000000])
+    .range(d3.schemeBlues[9])
+
+var x_1 = d3.scaleSqrt()
+    .domain([300000, 1010000])
+    .rangeRound([1, 400]);
+
+var color_2 = d3.scaleThreshold()
+            .domain([1500, 2000, 3000, 4000, 5000, 6000, 7000, 8000])
+            .range(d3.schemeBlues[9])
+
+var x_2 = d3.scaleSqrt()
+    .domain([1500, 8100])
+    .rangeRound([1, 400]);
+
+var color_3 = d3.scaleThreshold()
+            .domain([10, 25, 50, 75, 100, 125, 150, 175])
+            .range(d3.schemeOranges[9])
+var x_3 = d3.scaleLinear()
+    .domain([0, 185])
+    .rangeRound([1, 400]);
+
+var color_4 = d3.scaleThreshold()
+            .domain([10, 20, 30, 40, 50, 60, 75, 100])
+            .range(d3.schemeOranges[9])
+var x_4 = d3.scaleLinear()
+    .domain([0, 110])
+    .rangeRound([1, 400]);
+
+
+var color_5 = d3.scaleThreshold()
+            .domain([1100, 1500, 2000, 2500, 3000, 3500, 4000, 5000])
+            .range(d3.schemeBlues[9])
+
+var x_5 = d3.scaleSqrt()
+    .domain([1000, 5000])
+    .rangeRound([1, 400]);
+
+//var svg = d3.select("body").append("svg")
+var topos = ["Bay_Area_new.topojson",
+            "NY/NYC.topojson"];
+
+var csv_files = [
+                "CA_Zip_Zhvi_1bedroom.csv",
+                "CA_Zip_Zhvi_2bedroom.csv",
+                "CA_Zip_Zhvi_3bedroom.csv",
+                "CA_Zip_Zri_MultiFamilyResidenceRental.csv",
+                "CA_Zip_Zri_SingleFamilyResidenceRental.csv",
+                ];
+
+var titles = [
+              "Price of 1 Bedroom Home", //Price-1BR",
+              "Price of 2 Bedroom Home", //"Price-2BR",
+              "Price of 3 Bedroom Home", //"Price-3BR",
+              "Rent for Multiple Family", //"Rent Multi Family",
+              "Rent for Single Family", //"Rent-Single Family",
+             ];
+var legend_titles = [
+    "Price in USD",
+    "Price in USD",
+    "Price in USD",
+    "Rent in USD",
+    "Rent in USD",
+
+]
+
+var csv_metric = [
+    "Price   ",
+    "Price   ",
+    "Price   ",
+    "Rent    ",
+    "Rent    ",
+];
+
+var csv_pct = "Increase"
+
+var colors_num = [color_1,
+              color_1,
+              color_1,
+              color_5,
+              color_2,
+              ];
+
+
+var colors_pct = [color_3,
+              color_3,
+              color_3,
+              color_4,
+              color_4,
+              ];
+
+var xs_num = [x_1,
+          x_1,
+          x_1,
+          x_5,
+          x_2,
+         ];
+
+var xs_pct = [x_3,
+          x_3,
+          x_3,
+          x_4,
+          x_4,
+         ];
+// All arrays must be same size
+if ((csv_files.length != titles.length) ||
+    (csv_files.length != colors_num.length)) {
+    throw "Array lengths are not same"
+}
+var curr_topo_file = 0;
+var curr_csv_file = 0;
+var num_csv_files = csv_files.length;
+console.log("here");
+
+function sendArg(arg, callback)
+{
+    callback(null, arg);
+}
+function deferDrawMap(topo_index, data_index) {
+    console.log("Calling deferDrawMap")
+    loadingdiv = d3.select("#loading");
+    loadingdiv.style("opacity", 1);
+    
+    d3.queue()
+    .defer(d3.json, topos[topo_index])
+    .defer(d3.csv, csv_files[data_index])
+    .defer(d3.csv, "MedianZIP-3-csv.csv")
+    .defer(sendArg, topo_index)
+    .defer(sendArg, data_index)
+    .await(DrawMap)
+}
+
+deferDrawMap(curr_topo_file, curr_csv_file);
+
+//DrawMap(svg);
+function DrawMap(error, bay_area, csv_data, csv_income_pop, topo_index, data_index) {
+    if (error) {
+        throw error;
+    }
+
+    var obj = {};
+    for (i = 0; i < 100000; i++) {
+        obj[i] = [0, 0, 0, 0];
+    }
+
+    // Property Data
+    csv_data.forEach(function(d) {
+        obj[d.RegionName] = [d["2011-11"],
+                             ((d["2013-11"] - d["2011-11"])/ d["2011-11"]) * 100,
+                             ((d["2015-11"] - d["2011-11"])/ d["2011-11"]) * 100,
+                             ((d["2017-11"] - d["2011-11"])/ d["2011-11"]) * 100,
+                            ];
+    });
+
+    var income_pop = {};
+    for (i = 0; i < 100000; i++) {
+        income_pop[i] = [0, 0];
+    }
+    csv_income_pop.forEach(function(d) {
+        income_pop[d.Zip] = [d["Median"], d["Pop"]];
+    });
+
+    //console.log(obj);
+    // Projection changes for different cities
+    var projection = d3.geoMercator()
+    .center([-122.433701, 37.767683])
+    .scale(27000)
+    .translate([width/2, height/2 - 70]);
+    var path = d3.geoPath()
+      .projection(projection);
+    var visualizationWrapper = d3.select('#vis');
+    visualizationWrapper.selectAll("div").remove();
+
+    var unit = "";
+    for (i = 0; i < obj[0].length; i++)
+    {
+        var wrapper = visualizationWrapper.append('div')
+                        .style("width", width + 'px')
+                        .style("height", height + 'px');
+        if (i == 0) {
+            title1 = titles[data_index];
+            unit = csv_metric[data_index];
+
+        } else {
+            unit = "Increase"
+            title1 = "";
+        }
+        createMap(wrapper, bay_area, obj, income_pop, i, title1, 2011 + i*2, unit);
+    }
+
+    function showLegend(svg, use_pct)
+    {
+        g = svg.append("g")
+        .attr("class", "key")
+        .attr("transform", "translate(50,480)");
+
+        var xs;
+        var colors;
+        if (use_pct) {
+            xs = xs_pct;
+            colors = colors_pct;
+        } else {
+            xs = xs_num;
+            colors = colors_num;
+        }
+        g.selectAll("rect")
+            .data(colors[data_index].range().map(function(d) {
+            d = colors[data_index].invertExtent(d);
+            if (d[0] == null) d[0] = xs[data_index].domain()[0];
+            if (d[1] == null) d[1] = xs[data_index].domain()[1];
+            return d;
+            }))
+            .enter().append("rect")
+            .attr("height", 8)
+            .attr("x", function(d) { return xs[data_index](d[0]); })
+            .attr("width", function(d) { return xs[data_index](d[1]) - xs[data_index](d[0]); })
+            .attr("fill", function(d) { return colors[data_index](d[0]); });
+
+             g.append("text")
+            .attr("class", "caption")
+            .attr("x", 220)
+            .attr("y", 30)
+            .attr("fill", "#000")
+            .attr("text-anchor", "left")
+            .attr("font-weight", "bold")
+            .text(function(d) {
+                 if (use_pct) {
+                     return "Percent increase over 2011";}
+                 else {
+                     return legend_titles[data_index]
+                 }});
+
+        var xAxis;
+
+        if (use_pct) {
+            xAxis = d3.axisBottom(xs[data_index])
+                    .tickSize(10)
+                    .tickValues(colors[data_index].domain())
+                    .tickFormat(function(d) { return parseInt(d, 10) + "%"; })
+        } else {
+            if (data_index < 3) {
+                xAxis = d3.axisBottom(xs[data_index])
+                        .tickSize(10)
+                        .tickValues(colors[data_index].domain())
+                        .tickFormat(d3.formatPrefix(".1", 1e5))
+            } else {
+                xAxis = d3.axisBottom(xs[data_index])
+                        .tickSize(10)
+                        .tickValues(colors[data_index].domain())
+            }
+        }
+
+        g.call(xAxis)
+            .select(".domain")
+            .remove();
+    }
+
+    function createMap(wrapper, map, obj, income_pop, key_metric, title1, title2, unit)
+    {
+        var border=1;
+        var bordercolor='#cecece'
+        var svg = wrapper.append('svg')
+                .attr("width", width)
+                .attr("height", height)
+                .attr("transform", "translate(" + margin.left +"," + margin.top +")")
+                .attr("border",border)
+        var tooldiv = wrapper.append("div")
+                      .style("opacity", 0)
+                      .style("top", "-180px")
+                      .style("left","30px");
+
+         var g = svg.append("g")
+        .attr("class", "Zip_areas")
+        .selectAll("path")
+        .data(topojson.feature(map, map.objects.Zip_areas).features)
+        .enter().append("path")
+        .attr("fill", function(d) {
+            var val = obj[d.properties.ZIP][key_metric];
+            if (Number.isNaN(val)) {
+                val = 0;
+            }
+
+            if (val == Number.POSITIVE_INFINITY || val ==       Number.NEGATIVE_INFINITY) {
+                val = 0;
+            }
+            d.properties.val = val;
+            d.properties.metric = unit
+            d.properties.income = income_pop[d.properties.ZIP][0];
+            d.properties.pop = income_pop[d.properties.ZIP][1];
+
+            //console.log(d.properties)
+            //console.log(obj[d.properties.ZIP]);
+
+            if (val == 0 || Number.isNaN(val)) {
+                return "lightgrey"
+            } else {
+                if (i == 0) {
+                    return colors_num[data_index](val);
+                } else {
+                    return colors_pct[data_index](val);
+                }
+            }
+        })
+        .attr("stroke", "black")
+        .attr("stroke-opacity", 0.3)
+        .attr("d", path)
+        .on('mouseover', function(d){
+            var val = obj[d.properties.ZIP][key_metric];
+            if (unit == "Increase") {
+                if (val == Number.POSITIVE_INFINITY || val ==       Number.NEGATIVE_INFINITY || val == 0) {
+                    d.properties.val = "N/A"
+                } else {
+                    d.properties.val = val.toFixed(2) + "%"
+                }
+            } else {
+                if (d.properties.val == 0) {
+                    d.properties.val = "N/A"
+                } else {
+                    d.properties.val = currency.format(val)
+                }
+            }
+
+            //svg.selectAll("div").remove();
+
+            //tooldiv = d3.select("#tool-tip");
+            tooldiv.selectAll('*').remove();
+
+            var format = d3.format("");
+            tooldiv.transition()
+                .duration(200)
+                .style("opacity",1);
+            tooldiv.html("<pre>"+
+                        "<strong><center>" + d.properties.PO_NAME + "</center></strong>" +
+                      "Zip        : "+
+                      "<span style='float:right;'>" + format(d.properties.ZIP) + "</span><br>"+
+                      "<span class ='details'>" + unit +"   : </span>"+
+                      "<span style='float:right;'>" + d.properties.val + "</span><br>"+
+                      "<span class='details'>Income     : </span>"+
+                      "<span style='float:right;'>" + currency.format(d.properties.income) +
+                      "</span><br>" +
+                      "Population : " +
+                      "<span style='float:right;'>" + commas.format(d.properties.pop) +"</span>");
+
+
+        })
+        .on('mouseout', function(d){
+            tooldiv.transition()
+                .duration(100)
+                .selectAll('*').remove();
+        })
+        .on('click', function(d){
+            city= d.properties.PO_NAME;
+            city = city.replace(/\s+/g, '-').toLowerCase();
+            zillow_url = "https://www.zillow.com/" + city + "-ca-" + d.properties.ZIP + "/home-values/"
+            window.open(zillow_url,'_blank');
+
+        })
+
+        /*Creates the title */
+        if (title1 != "") {
+            $('#title_container').html("<h3>"+title1+"</h3>");
+            showLegend(svg, 0);
+        } else {
+            showLegend(svg, 1);
+        }
+/*        svg.append("text")
+        .attr("x", (50))
+        .attr("y", (50))
+        .attr("text-anchor", "left")
+        .style("font-size", "30px")
+        .text(title1); */
+
+        svg.append("text")
+        .attr("x", (30))
+        .attr("y", (50))
+        .attr("text-anchor", "left")
+        .style("font-size", "22px")
+        .style("opacity", 0.7)
+        .text(title2);
+
+        /*showLegend(svg);*/
+
+                var borderPath = svg.append("rect")
+       			.attr("x", 0)
+       			.attr("y", 0)
+       			.attr("height", height)
+       			.attr("width", width)
+       			.style("stroke", bordercolor)
+       			.style("fill", "none")
+       			.style("stroke-width", 0.5);
+
+          var LegendPath = svg.append("rect")
+       			.attr("x", 30)
+       			.attr("y", height - 50)
+       			.attr("height", 43)
+       			.attr("width", width-85)
+       			.style("stroke", 'black')
+       			.style("fill", "none")
+       			.style("stroke-width", 0.25);
+    }
+    loadingdiv = d3.select("#loading");
+    loadingdiv.style("opacity", 0);
+}
+
+
+$('#home_price_1').click(function(){
+    deferDrawMap(0, 0);
+});
+$('#home_price_2').click(function(){
+    deferDrawMap(0, 1);
+});
+$('#home_price_3').click(function(){
+    deferDrawMap(0, 2);
+});
+$('#rent_price_1').click(function(){
+    deferDrawMap(0, 4);
+});
+$('#rent_price_2').click(function(){
+    deferDrawMap(0, 3);
+});
+
+</script>
+</body>
+<div class="panel panel-default" id="description_container" style="border:1px solid #cecece;" >
+    <div class='row'>
+        <div class='col-sm-4'>
+        </div>
+    </div>
+
+
+</div>
+<div class="panel panel-default" id="srcs_container" style="border:1px solid #cecece;" >
+    <div class='col-sm-4'>
+        <div class='row'><label>Files</label></div>
+        <div class='row'>index.html</div>
+        <div class='row'>Bay_Area_new.topojson</div>
+        <div class='row'>MedianZIP-3-csv.csv</div>
+        <div class='row'>CA_Zip_Zhvi_1bedroom.csv</div>
+        <div class='row'>CA_Zip_Zhvi_2bedroom.csv</div>
+        <div class='row'>CA_Zip_Zhvi_3bedroom.csv</div>
+        <div class='row'>CA_Zip_Zri_MultiFamilyResidenceRental.csv</div>
+        <div class='row'>CA_Zip_Zri_SingleFamilyResidenceRental.csv</div>
+    </div>
+    <div class='col-sm-4'>
+        <div class='row'><label>Data Sources</label></div>
+        <div class='row'><a href="https://www.zillow.com/research/data/">Zillow Research Data</a></div>
+        <div class='row'><a href="http://files.zillowstatic.com/research/public/Zip.zip">Zillow Research Data (Property Data by ZIP Code)</a></div>
+        <div class='row'><a href="https://earthworks.stanford.edu/catalog/ark28722-s7888q">Bay Area ZIP Code Shapefile</a></div>
+        <div class='row'><a href="https://earthworks.stanford.edu/catalog/ark28722-s7888q">Bay Area ZIP Code Shapefile</a></div>
+        <div class='row'><a href="https://earthworks.stanford.edu/catalog/sde-columbia-doitt_zip_codes_2009"> New York City Zip Code Shapefile</a></div>
+        <div class='row'><a href="https://www.zillow.com/howto/api/neighborhood-boundaries.htm">Neighborhood boundries</a></div>
+    </div>
+    <div class='row'>
+        <div class='col-sm-4'>
+            <label>Visual and Code Sources</label></br>
+            <a href="https://github.com/d3/d3/blob/master/API.md">D3 API Reference</a>
+            <a hrerf="https://sureshlodha.github.io/CMPS165_Fall2016_FinalProjects/SantaCruzUrbanDisplacement/Urban-Displacement-Santa-Cruz/">Urban Displacement in Santa Cruz County CMPS165 Fall 2016 Project</a>
+            <a href="http://frankbowers24.github.io/">Bay Area Stats using D3</a>
+            <a href="http://www.urbandisplacement.org/map/sf"> Urban Displacement Project: SF Map</a>
+        </div>
+    </div>
+
+</div>
+<div class="panel panel-default" id="description_container" style="border:1px solid #cecece;" >
+<div align="center">
+Created by Nakul Dhotre (nakul at soe.ucsc.edu) and Catherine Lu (clu47 @ ucsc.edu).
+<br/>Designed for CMPS 263 Class Project
+</div>
+</div>
+</div>
